@@ -156,20 +156,25 @@ class Jbot:
         # get the author
         author = ctx.message.author
         # split the command up
-        etime = args[0]
-        tz = args[2]
-        # parse the time part
-        hours, minutes, error_count, \
-        return_message = self._parse_evetime(etime,
-                                             error_count,
-                                             return_message)
-        # if that shit all works ok, now attempt the tz conversion
-        if error_count == 0:
-            etime = self._evetime_of_request(hours, minutes)
-            TZ, error_count, return_message = self._parse_timezone(tz, error_count, return_message)
-
-            # once everything above is fine, do the actual conversion, or report on errors
+        if args and len(args) == 3:
+            etime = args[0]
+            tz = args[2]
+            # parse the time part
+            hours, minutes, error_count, \
+            return_message = self._parse_evetime(etime,
+                                                 error_count,
+                                                 return_message)
+            # if that shit all works ok, now attempt the tz conversion
             if error_count == 0:
-                return_message = etime.astimezone(timezone(TZ)).strftime('%H:%M')
-        em = discord.Embed(author=author, description=return_message)
-        await self.bot.say(embed=em)
+                etime = self._evetime_of_request(hours, minutes)
+                TZ, error_count, return_message = self._parse_timezone(tz, error_count, return_message)
+
+                # once everything above is fine, do the actual conversion, or report on errors
+                if error_count == 0:
+                    return_message = etime.astimezone(timezone(TZ)).strftime('%H:%M')
+            em = discord.Embed(author=author, description=return_message)
+            await self.bot.say(embed=em)
+        else:
+            return_message = datetime.utcnow().strftime('%H:%M')
+            em = discord.Embed(author=author, description=return_message)
+            await self.bot.say(embed=em)
