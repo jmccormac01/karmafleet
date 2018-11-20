@@ -148,6 +148,14 @@ async def on_message(message):
     Handle incoming messages and convert time requests
     """
     sp = message.content.split()
+    print(message.attachments)
+    print(message.content)
+    if 'http' in message.content or 'www' in message.content:
+        await client.delete_message(message)
+    elif len(message.embeds) > 0 or len(message.attachments) > 0:
+        await client.delete_message(message)
+
+
     return_message = ""
     error_count = 0
     # check we want time conversion from eve time
