@@ -18,7 +18,7 @@ def arg_parse():
     p.add_argument('operation',
                    choices=['gt', 'lt', 'eq'])
     p.add_argument('limit',
-                   type=str,
+                   type=float,
                    help='limit to search by')
     return p.parse_args()
 
@@ -32,12 +32,21 @@ if __name__ == "__main__":
         with open(t, 'r') as infile:
             lines = infile.readlines()[1:]
 
-        if args.operation == 'gt':
-            hits += ["{},{}".format(t, line) for line in lines if line.split(',')[args.column_id - 1] > args.limit]
-        elif args.operation == 'eq':
-            hits += ["{},{}".format(t, line) for line in lines if line.split(',')[args.column_id - 1] == args.limit]
-        else:
-            hits += ["{},{}".format(t, line) for line in lines if line.split(',')[args.column_id - 1] < args.limit]
+        for line in lines:
+            # check we have a number to compare, otherwise skip line
+            try:
+                check = float(line.split(',')[args.column_id - 1])
+            except TypeError:
+                continue
+            # check the number vs the limit
+            if args.operation == 'gt' and check > args.limit:
+                hits.append("{},{}".format(t, line))
+            elif args.operation == 'eq' and check == args.limit:
+                hits.append("{},{}".format(t, line))
+            elif args.operation == 'lt' and check < args.limit:
+                hits.append("{},{}".format(t, line))
+            else:
+                pass
 
     # save the hits
     with open('results.txt', 'w') as outfile:
